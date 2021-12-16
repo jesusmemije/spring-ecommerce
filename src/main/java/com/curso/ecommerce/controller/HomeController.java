@@ -23,18 +23,18 @@ import com.curso.ecommerce.service.ProductoService;
 @Controller
 @RequestMapping("/")
 public class HomeController {
-	
+
 	private final Logger log = LoggerFactory.getLogger(HomeController.class);
 
 	@Autowired
 	private ProductoService productoService;
-	
+
 	// Para almacenar los detalles de la orden
 	List<DetalleOrden> detalles = new ArrayList<DetalleOrden>();
-	
+
 	// Datos de la orden
 	Orden orden = new Orden();
-	
+
 	@GetMapping("")
 	public String home(Model model) {
 
@@ -42,31 +42,48 @@ public class HomeController {
 
 		return "usuario/home";
 	}
-	
+
 	@GetMapping("productohome/{id}")
-	public String productoHome( @PathVariable Integer id, Model model ) {
-		
+	public String productoHome(@PathVariable Integer id, Model model) {
+
 		Producto producto = new Producto();
-		
+
 		Optional<Producto> productoOptional = productoService.get(id);
 		producto = productoOptional.get();
-		
+
 		model.addAttribute("producto", producto);
 		return "usuario/productohome";
 	}
-	
+
 	@PostMapping("/cart")
-	public String addCart( @RequestParam Integer id, @RequestParam Integer cantidad ) {
-		
+	public String addCart(@RequestParam Integer id, @RequestParam Integer cantidad, Model model) {
+
 		DetalleOrden detalleOrden = new DetalleOrden();
 		Producto producto = new Producto();
 		double sumaTotal = 0;
-		
+
 		Optional<Producto> optionalProducto = productoService.get(id);
 		log.info("Producto añadido: {}", optionalProducto);
 		log.info("Cantidad: {}", cantidad);
+
+		producto = optionalProducto.get();
+
+		detalleOrden.setCantidad(cantidad);
+		detalleOrden.setPrecio(producto.getPrecio());
+		detalleOrden.setNombre(producto.getNombre());
+		detalleOrden.setTotal(producto.getPrecio() * cantidad);
+		detalleOrden.setProducto(producto);
 		
+		detalles.add(detalleOrden);
+
+		sumaTotal = detalles.stream().mapToDouble(dt -> dt.getTotal()).sum();
+
+		orden.setTotal(sumaTotal);
+
+		model.addAttribute("cart", detalles);
+		model.addAttribute("orden", orden);
+
 		return "usuario/carrito";
 	}
-	
+
 }
