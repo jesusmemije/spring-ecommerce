@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.curso.ecommerce.model.Producto;
 import com.curso.ecommerce.model.Usuario;
 import com.curso.ecommerce.service.IProductoService;
+import com.curso.ecommerce.service.IUsuarioService;
 import com.curso.ecommerce.service.UploadFileService;
 
 @Controller
@@ -29,6 +30,9 @@ public class ProductoController {
 	
 	@Autowired
 	private IProductoService productoService;
+	
+	@Autowired
+	private IUsuarioService usuarioService;
 	
 	@Autowired
 	private UploadFileService upload;
@@ -49,7 +53,7 @@ public class ProductoController {
 		
 		LOGGER.info("Este es el objeto producto {}",producto);
 		
-		Usuario u = new Usuario(1, "", "", "", "", "", "", "");
+		Usuario u = usuarioService.findById( Integer.parseInt(session.getAttribute("idusuario").toString()) ).get();
 		producto.setUsuario(u);
 		
 		//imagen
